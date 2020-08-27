@@ -8,22 +8,21 @@ class App {
     this.todoListInstance = null;
     this.addTodoInstance = null;
 
-    task.subscribe(this.init.bind(this));
+    // task.subscribe(this.init.bind(this));
   }
   handleDom() {
     const todoListElement = document.getElementById("card");
     const addTodoElement = document.getElementById("myModal");
 
-    this.todoListInstance = new TodoList(todoListElement);
-    this.addTodoInstance = new AddTodo(addTodoElement);
+    // this.todoListInstance = new TodoList(todoListElement);
+    // this.addTodoInstance = new AddTodo(addTodoElement);
 
-    // if (!this.todoListInstance) {
-    //   this.todoListInstance = new TodoList(todoListElement);
-    // }
-    // if (!this.addTodoInstance) {
-    //   this.addTodoInstance = new AddTodo(addTodoElement);
-    // }
-
+    if (!this.todoListInstance) {
+      this.todoListInstance = new TodoList(todoListElement);
+    }
+    if (!this.addTodoInstance) {
+      this.addTodoInstance = new AddTodo(addTodoElement);
+    }
     this.todoListInstance.init();
     this.addTodoInstance.init();
   }

@@ -1,6 +1,9 @@
+import task from "../../store/task";
+import Button from "../../components/Button";
 export default class Header {
   constructor(element) {
     this.element = element;
+    task.subscribe(this.init.bind(this));
   }
   render() {
     return `
@@ -11,14 +14,13 @@ export default class Header {
             </h3>
             </div>
             <div class="col-md-6 text-right">
-            <button
-                class="btn btn-primary"
-                id="btnThem"
-                data-toggle="modal"
-                data-target="#myModal"
-            >
-                Add new task
-            </button>
+            ${Button({
+              text: "Add new task",
+              color: "btn-primary",
+              id: "btnThem",
+              dataToggle: "modal",
+              dataTarget: "#myModal",
+            })}
             </div>
         </div>
         `;

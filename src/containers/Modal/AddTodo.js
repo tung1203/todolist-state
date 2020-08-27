@@ -1,7 +1,9 @@
 import task from "../../store/task";
+import Button from "../../components/Button";
 export default class Modal {
   constructor(element) {
     this.element = element;
+    this.addTask = this.addTask.bind(this);
   }
   addTask() {
     const id = Date.now();
@@ -19,6 +21,11 @@ export default class Modal {
       complete: false,
     };
     task.addTask(newTask);
+
+    document.getElementById("title").value = "";
+    document.getElementById("description").value = "";
+    document.getElementById("from").value = "";
+    document.getElementById("to").value = "";
   }
   handleDOM() {
     const addTaskEl = document.querySelector("#btn-add-task");
@@ -97,17 +104,18 @@ export default class Modal {
 
           <!-- Modal footer -->
           <div class="modal-footer" id="modal-footer">
-            <button id="btn-add-task" type="button" class="btn btn-success" data-dismiss="modal">
-              Add New Task
-            </button>
-            <button
-              id="btnDong"
-              type="button"
-              class="btn btn-danger"
-              data-dismiss="modal"
-            >
-              Đóng
-            </button>
+          ${Button({
+            text: "Add new task",
+            color: "btn-success",
+            id: "btn-add-task",
+            dataDismiss: "modal",
+          })}
+          ${Button({
+            text: "Đóng",
+            color: "btn-danger",
+            id: "btnDong",
+            dataDismiss: "modal",
+          })}
           </div>
         </div>
       </div>

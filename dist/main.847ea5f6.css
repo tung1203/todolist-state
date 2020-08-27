@@ -38,18 +38,10 @@ p {
 .task.complete:hover {
   background-color: #4acea352;
 }
-.task.complete .task__status {
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='405.272' height='405.272'%3e%3cpath d='M393.401 124.425L179.603 338.208c-15.832 15.835-41.514 15.835-57.361 0L11.878 227.836c-15.838-15.835-15.838-41.52 0-57.358 15.841-15.841 41.521-15.841 57.355-.006l81.698 81.699L336.037 67.064c15.841-15.841 41.523-15.829 57.358 0 15.835 15.838 15.835 41.514.006 57.361z' fill='%23fff'/%3e%3c/svg%3e");
-  background-size: 10px;
-  background-color: #4acea3;
-  border-color: #38bb90;
-  background-repeat: no-repeat;
-  background-position: center;
-}
 .task:hover {
   background-color: #f6fbff;
 }
-.task:hover .task__delete {
+.task:hover .delete-icon {
   outline: none;
   visibility: visible;
   opacity: 1;
@@ -76,7 +68,19 @@ p {
   margin-bottom: 0;
   font-size: 12px;
 }
-.task__status {
+.task__date {
+  margin-bottom: 0;
+  margin-left: auto;
+}
+
+.todo {
+  max-width: 900px;
+}
+.todo__modal .modal-dialog {
+  max-width: 800px;
+}
+
+.status {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
@@ -90,7 +94,16 @@ p {
   position: relative;
   outline: none;
 }
-.task__delete {
+.status.complete {
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' width='405.272' height='405.272'%3e%3cpath d='M393.401 124.425L179.603 338.208c-15.832 15.835-41.514 15.835-57.361 0L11.878 227.836c-15.838-15.835-15.838-41.52 0-57.358 15.841-15.841 41.521-15.841 57.355-.006l81.698 81.699L336.037 67.064c15.841-15.841 41.523-15.829 57.358 0 15.835 15.838 15.835 41.514.006 57.361z' fill='%23fff'/%3e%3c/svg%3e");
+  background-size: 10px;
+  background-color: #4acea3;
+  border-color: #38bb90;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.delete-icon {
   border: 0;
   width: 18px;
   height: 18px;
@@ -105,17 +118,6 @@ p {
   opacity: 0;
   margin-left: 20px;
   outline: none;
-}
-.task__date {
-  margin-bottom: 0;
-  margin-left: auto;
-}
-
-.todo {
-  max-width: 900px;
-}
-.todo__modal .modal-dialog {
-  max-width: 800px;
 }
 
 /*# sourceMappingURL=/main.847ea5f6.css.map */
