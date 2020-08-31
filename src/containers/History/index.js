@@ -1,18 +1,17 @@
-
-import task from "../../store/task";
-export default class Footer {
+export default class History {
   constructor(element) {
     this.element = element;
-    task.subscribe(this.init.bind(this));
   }
+  handleDom() {}
   render() {
     return `
-    <div>
-     
+    <div class="history center">
+       history
       </div>
       `;
   }
   init() {
     this.element.innerHTML = this.render();
+    this.handleDom();
   }
 }

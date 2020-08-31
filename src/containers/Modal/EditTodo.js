@@ -1,17 +1,16 @@
 import task from "../../store/task";
 import Button from "../../components/Button";
-export default class AddTodo {
+export default class EditTodo {
   constructor(element) {
     this.element = element;
-    this.addTask = this.addTask.bind(this);
+    this.editTask = this.editTask.bind(this);
   }
-  addTask() {
-    const id = Date.now();
-    let title = document.getElementById("title").value;
-    let description = document.getElementById("description").value;
-    let from = document.getElementById("from").value;
-    let to = document.getElementById("to").value;
-
+  editTask(id) {
+    id = parseInt(id);
+    let title = document.getElementById("title-edit").value;
+    let description = document.getElementById("description-edit").value;
+    let from = document.getElementById("from-edit").value;
+    let to = document.getElementById("to-edit").value;
     let newTask = {
       id,
       title,
@@ -20,23 +19,28 @@ export default class AddTodo {
       to,
       complete: false,
     };
-    task.addTask(newTask);
-    
-    document.getElementById("title").value = "";
-    document.getElementById("description").value = "";
-    document.getElementById("from").value = "";
-    document.getElementById("to").value = "";
+
+    task.editTask(newTask);
+
+    document.getElementById("title-edit").value = "";
+    document.getElementById("description-edit").value = "";
+    document.getElementById("from-edit").value = "";
+    document.getElementById("to-edit").value = "";
   }
   handleDOM() {
-    const addTaskEl = document.querySelector("#btn-add-task");
-    addTaskEl && addTaskEl.addEventListener("click", this.addTask);
+    const addTaskEl = document.querySelector("#btn-edit-task");
+    const that = this;
+    addTaskEl &&
+      addTaskEl.addEventListener("click", function (e) {
+        that.editTask(e.target.getAttribute("data-id"));
+      });
   }
   render() {
     return `
       <div class="modal-dialog">
         <div class="modal-content p-3">
           <header class="head-form mb-0 mt-4 text-center">
-            <h2 id="header-title">Add New Task</h2>
+            <h2 id="header-title">Edit Task</h2>
           </header>
 
           <!-- Modal body -->
@@ -52,7 +56,7 @@ export default class AddTodo {
                   <input
                     type="text"
                     name="title"
-                    id="title"
+                    id="title-edit"
                     class="col-10 form-control input-sm"
                     placeholder="Title"
                   />
@@ -70,7 +74,7 @@ export default class AddTodo {
                 <input
                   type="text"
                   name="description"
-                  id="description"
+                  id="description-edit"
                   class="col-10 form-control input-sm"
                   placeholder="Description"
                 />
@@ -84,7 +88,7 @@ export default class AddTodo {
                 <input
                   class="form-control col-10"
                   type="datetime-local"
-                  id="from"
+                  id="from-edit"
                 />
               </div>
               <div class="form-group row">
@@ -96,7 +100,7 @@ export default class AddTodo {
                 <input
                   class="form-control col-10"
                   type="datetime-local"
-                  id="to"
+                  id="to-edit"
                 />
               </div>
             </form>
@@ -111,9 +115,9 @@ export default class AddTodo {
             dataDismiss: "modal",
           })}
           ${Button({
-            text: "Add new task",
+            text: "Edit",
             color: "btn-success",
-            id: "btn-add-task",
+            id: "btn-edit-task",
             dataDismiss: "modal",
           })}
           </div>

@@ -186,12 +186,39 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToAr
 
 function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
-var initialState = [];
+var initialState = [{
+  id: 1598588336036,
+  title: "12",
+  description: "34",
+  from: "2020-08-07T11:18",
+  to: "2020-08-15T11:18",
+  complete: false
+}, {
+  id: 1598588344144,
+  title: "5",
+  description: "3",
+  from: "2020-08-05T11:19",
+  to: "2020-08-14T11:19",
+  complete: false
+}, {
+  id: 1598588344145,
+  title: "5",
+  description: "3",
+  from: "2020-08-05T11:19",
+  to: "2020-08-29T18:19",
+  complete: false
+}];
 
 var _createState = (0, _createState2.default)(initialState),
     getState = _createState.getState,
     setState = _createState.setState,
     subscribe = _createState.subscribe;
+
+var getTaskById = function getTaskById(id) {
+  return getState().filter(function (task) {
+    return task.id === parseInt(id);
+  });
+};
 
 var addTask = function addTask(task) {
   setState(function (prevState) {
@@ -219,13 +246,27 @@ var completeTask = function completeTask(id) {
   });
 };
 
+var editTask = function editTask(newTask) {
+  setState(function (prevState) {
+    return prevState.map(function (task) {
+      if (task.id !== parseInt(newTask.id)) {
+        return task;
+      }
+
+      return _objectSpread(_objectSpread({}, task), newTask);
+    });
+  });
+};
+
 var task = {
   getState: getState,
   setState: setState,
   subscribe: subscribe,
+  getTaskById: getTaskById,
   addTask: addTask,
   removeTask: removeTask,
-  completeTask: completeTask
+  completeTask: completeTask,
+  editTask: editTask
 };
 var _default = task;
 exports.default = _default;
@@ -243,8 +284,9 @@ function Button(_ref) {
       id = _ref.id,
       dataToggle = _ref.dataToggle,
       dataTarget = _ref.dataTarget,
-      dataDismiss = _ref.dataDismiss;
-  return "\n    <button\n        class=\"btn ".concat(color, "\"\n        id=").concat(id, "\n        data-toggle=").concat(dataToggle, "\n        data-target=").concat(dataTarget, "\n        data-dismiss=").concat(dataDismiss, "\n        >\n        ").concat(text, "\n    </button>\n      ");
+      dataDismiss = _ref.dataDismiss,
+      dataId = _ref.dataId;
+  return "\n    <button\n        class=\"btn ".concat(color, "\"\n        id=").concat(id, "\n        data-toggle=").concat(dataToggle, "\n        data-target=").concat(dataTarget, "\n        data-dismiss=").concat(dataDismiss, "\n        data-id=\"").concat(dataId, "\"\n        >\n        ").concat(text, "\n    </button>\n      ");
 }
 },{}],"src/containers/Todolist/Header.js":[function(require,module,exports) {
 "use strict";
@@ -322,7 +364,65 @@ function DeleteIcon(_ref) {
   var id = _ref.id;
   return "\n    <button class=\"delete-icon delete-js\" data-id=\"".concat(id, "\"></button>\n        ");
 }
-},{}],"src/components/Task.js":[function(require,module,exports) {
+},{}],"src/utils/convertIso.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+//2020-08-14T11:19
+var convertIso = function convertIso(date) {
+  var newDate = new Date(date);
+  var day = newDate.getDate(),
+      month = newDate.getMonth() + 1,
+      year = newDate.getFullYear(),
+      hour = newDate.getHours(),
+      minute = newDate.getMinutes();
+  hour = hour < 10 ? "0" + newDate.getHours() : newDate.getHours();
+  month = month < 10 ? "0" + newDate.getMonth() : newDate.getMonth();
+  minute = minute < 10 ? "0" + newDate.getMinutes() : newDate.getMinutes();
+  return "".concat(year, "-").concat(month, "-").concat(day, "T").concat(hour, ":").concat(minute);
+};
+
+var _default = convertIso;
+exports.default = _default;
+},{}],"src/utils/dueDate.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = dueDate;
+
+var _convertIso = _interopRequireDefault(require("./convertIso"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+/**
+ * normal
+ * warning
+ * overDate
+ */
+function dueDate(dueDate) {
+  var alarm = 1000 * 60 * 60 * 24 * 1; // 1 day //8640000
+
+  var today = (0, _convertIso.default)(Date.now());
+  dueDate = (0, _convertIso.default)(dueDate);
+  var timeLeft = new Date(dueDate) - new Date(today);
+
+  if (timeLeft < 0) {
+    return "overdate";
+  }
+
+  if (timeLeft < alarm) {
+    return "warning";
+  }
+
+  return "normal";
+}
+},{"./convertIso":"src/utils/convertIso.js"}],"src/components/Task.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -334,6 +434,10 @@ var _StatusIcon = _interopRequireDefault(require("./StatusIcon"));
 
 var _DeleteIcon = _interopRequireDefault(require("./DeleteIcon"));
 
+var _Button = _interopRequireDefault(require("./Button"));
+
+var _dueDate = _interopRequireDefault(require("../utils/dueDate"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function Task(_ref) {
@@ -343,20 +447,29 @@ function Task(_ref) {
       from = _ref.from,
       to = _ref.to,
       complete = _ref.complete;
-  return "\n    <div class=\"task ".concat(complete ? "complete" : "", "\" data-id=\"").concat(id, "\">\n    ").concat((0, _StatusIcon.default)({
+  var color = "";
+
+  if (complete) {
+    color = "complete";
+  } else {
+    color = (0, _dueDate.default)(to);
+  }
+
+  return "\n    <div class=\"task ".concat(color, "\" data-id=\"").concat(id, "\">\n    ").concat((0, _StatusIcon.default)({
     id: id,
     complete: complete
-  }), "\n      <div class=\"task__content\">\n          <label class=\"task__title\" id=\"js-task-title\">").concat(title, "</label>\n          <p class=\"task__des\" id=\"js-task-des\">").concat(description, "</p>\n      </div>\n      <div class=\"task__date\">\n          <p class=\"task__from\" id=\"js-task-from\">").concat(from, "</p>\n          <p class=\"task__to\" id=\"js-task-to\">").concat(to, "</p>\n      </div>\n      ").concat((0, _DeleteIcon.default)({
+  }), "\n      <div class=\"task__content\">\n          <label class=\"task__title\" id=\"js-task-title\">").concat(title, "</label>\n          <p class=\"task__des\" id=\"js-task-des\">").concat(description, "</p>\n      </div>\n      <div class=\"task__date\">\n          <p class=\"task__from\" id=\"js-task-from\">").concat(from, "</p>\n          <p class=\"task__to\" id=\"js-task-to\">").concat(to, "</p>\n      </div>\n      ").concat((0, _Button.default)({
+    text: "Edit",
+    color: "text-info",
+    id: "modalEditBtn",
+    dataToggle: "modal",
+    dataTarget: "#modalEdit",
+    dataId: id
+  }), "\n      ").concat((0, _DeleteIcon.default)({
     id: id
   }), "\n    </div>\n    ");
 }
-
-{
-  /* <input class="status ${
-  complete ? "complete" : ""
-  } todoStatus-js" type="checkbox" data-id="${id}" /> */
-}
-},{"./StatusIcon":"src/components/StatusIcon.js","./DeleteIcon":"src/components/DeleteIcon.js"}],"src/containers/Todolist/TaskList.js":[function(require,module,exports) {
+},{"./StatusIcon":"src/components/StatusIcon.js","./DeleteIcon":"src/components/DeleteIcon.js","./Button":"src/components/Button.js","../utils/dueDate":"src/utils/dueDate.js"}],"src/containers/Todolist/TaskList.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -465,16 +578,6 @@ var Footer = /*#__PURE__*/function () {
 }();
 
 exports.default = Footer;
-{
-  /* <button
-  class="btn btn-primary"
-  id="btnHistory"
-  data-toggle="modal"
-  data-target="#history"
-  >
-  History
-  </button> */
-}
 },{"../../store/task":"src/store/task.js"}],"src/containers/Todolist/index.js":[function(require,module,exports) {
 "use strict";
 
@@ -531,11 +634,27 @@ var Counter = /*#__PURE__*/function () {
       this.todoListHeaderInstance.init();
       this.todoListTaskListInstance.init();
       this.todoLisFooterInstance.init();
+      $("#modalEdit").on("show.bs.modal", function (e) {
+        var taskId = $(e.relatedTarget).data("id");
+        $("#btn-edit-task").attr("data-id", taskId);
+
+        var currentTask = _task.default.getTaskById(taskId);
+
+        var _currentTask$ = currentTask[0],
+            title = _currentTask$.title,
+            description = _currentTask$.description,
+            from = _currentTask$.from,
+            to = _currentTask$.to;
+        document.getElementById("title-edit").value = title;
+        document.getElementById("description-edit").value = description;
+        document.getElementById("from-edit").value = from;
+        document.getElementById("to-edit").value = to;
+      });
     }
   }, {
     key: "render",
     value: function render() {
-      return "\n    <div class=\"card-header myCardHeader\" id=\"card-header\"></div>\n\n    <div class=\"card-body\" id=\"card-body\"></div>\n\n    <div class=\"card-footer myCardFooter\" id=\"card-footer\"></div>\n\n      ";
+      return "\n    <div class=\"todo center\">\n        <div class=\"container\">\n          <div class=\"card text-center\" id=\"card\">\n        \n          <div class=\"card-header myCardHeader\" id=\"card-header\"></div>\n\n          <div class=\"card-body\" id=\"card-body\"></div>\n\n          <div class=\"card-footer myCardFooter\" id=\"card-footer\"></div>\n\n          </div>\n      </div>\n    \n\n      ";
     }
   }, {
     key: "init",
@@ -549,7 +668,48 @@ var Counter = /*#__PURE__*/function () {
 }();
 
 exports.default = Counter;
-},{"./Header":"src/containers/Todolist/Header.js","./TaskList":"src/containers/Todolist/TaskList.js","./Footer":"src/containers/Todolist/Footer.js","../../store/task":"src/store/task.js"}],"src/containers/Modal/AddTodo.js":[function(require,module,exports) {
+},{"./Header":"src/containers/Todolist/Header.js","./TaskList":"src/containers/Todolist/TaskList.js","./Footer":"src/containers/Todolist/Footer.js","../../store/task":"src/store/task.js"}],"src/containers/History/index.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var History = /*#__PURE__*/function () {
+  function History(element) {
+    _classCallCheck(this, History);
+
+    this.element = element;
+  }
+
+  _createClass(History, [{
+    key: "handleDom",
+    value: function handleDom() {}
+  }, {
+    key: "render",
+    value: function render() {
+      return "\n    <div class=\"history center\">\n       history\n      </div>\n      ";
+    }
+  }, {
+    key: "init",
+    value: function init() {
+      this.element.innerHTML = this.render();
+      this.handleDom();
+    }
+  }]);
+
+  return History;
+}();
+
+exports.default = History;
+},{}],"src/containers/Modal/AddTodo.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -569,15 +729,15 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var Modal = /*#__PURE__*/function () {
-  function Modal(element) {
-    _classCallCheck(this, Modal);
+var AddTodo = /*#__PURE__*/function () {
+  function AddTodo(element) {
+    _classCallCheck(this, AddTodo);
 
     this.element = element;
     this.addTask = this.addTask.bind(this);
   }
 
-  _createClass(Modal, [{
+  _createClass(AddTodo, [{
     key: "addTask",
     value: function addTask() {
       var id = Date.now();
@@ -611,14 +771,14 @@ var Modal = /*#__PURE__*/function () {
     key: "render",
     value: function render() {
       return "\n      <div class=\"modal-dialog\">\n        <div class=\"modal-content p-3\">\n          <header class=\"head-form mb-0 mt-4 text-center\">\n            <h2 id=\"header-title\">Add New Task</h2>\n          </header>\n\n          <!-- Modal body -->\n          <div class=\"modal-body\">\n            <form role=\"form\">\n              <div class=\"form-group row\">\n                <div class=\"input-group\">\n                  <label\n                    for=\"example-datetime-local-input\"\n                    class=\"col-2 col-form-label\"\n                    >Title</label\n                  >\n                  <input\n                    type=\"text\"\n                    name=\"title\"\n                    id=\"title\"\n                    class=\"col-10 form-control input-sm\"\n                    placeholder=\"Title\"\n                  />\n                </div>\n\n                <span class=\"sp-thongbao\" id=\"tbMaNV\"></span>\n              </div>\n\n              <div class=\"form-group row\">\n                <label\n                  for=\"example-datetime-local-input\"\n                  class=\"col-2 col-form-label\"\n                  >Description</label\n                >\n                <input\n                  type=\"text\"\n                  name=\"description\"\n                  id=\"description\"\n                  class=\"col-10 form-control input-sm\"\n                  placeholder=\"Description\"\n                />\n              </div>\n              <div class=\"form-group row\">\n                <label\n                  for=\"example-datetime-local-input\"\n                  class=\"col-2 col-form-label\"\n                  >From</label\n                >\n                <input\n                  class=\"form-control col-10\"\n                  type=\"datetime-local\"\n                  id=\"from\"\n                />\n              </div>\n              <div class=\"form-group row\">\n                <label\n                  for=\"example-datetime-local-input\"\n                  class=\"col-2 col-form-label\"\n                  >Due date</label\n                >\n                <input\n                  class=\"form-control col-10\"\n                  type=\"datetime-local\"\n                  id=\"to\"\n                />\n              </div>\n            </form>\n          </div>\n\n          <!-- Modal footer -->\n          <div class=\"modal-footer\" id=\"modal-footer\">\n          ".concat((0, _Button.default)({
+        text: "Đóng",
+        color: "btn-secondary",
+        id: "btnDong",
+        dataDismiss: "modal"
+      }), "\n          ").concat((0, _Button.default)({
         text: "Add new task",
         color: "btn-success",
         id: "btn-add-task",
-        dataDismiss: "modal"
-      }), "\n          ").concat((0, _Button.default)({
-        text: "Đóng",
-        color: "btn-danger",
-        id: "btnDong",
         dataDismiss: "modal"
       }), "\n          </div>\n        </div>\n      </div>\n    ");
     }
@@ -630,18 +790,145 @@ var Modal = /*#__PURE__*/function () {
     }
   }]);
 
-  return Modal;
+  return AddTodo;
 }();
 
-exports.default = Modal;
-},{"../../store/task":"src/store/task.js","../../components/Button":"src/components/Button.js"}],"src/index.js":[function(require,module,exports) {
+exports.default = AddTodo;
+},{"../../store/task":"src/store/task.js","../../components/Button":"src/components/Button.js"}],"src/containers/Modal/EditTodo.js":[function(require,module,exports) {
 "use strict";
 
-var _task = _interopRequireDefault(require("./store/task"));
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _task = _interopRequireDefault(require("../../store/task"));
+
+var _Button = _interopRequireDefault(require("../../components/Button"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var EditTodo = /*#__PURE__*/function () {
+  function EditTodo(element) {
+    _classCallCheck(this, EditTodo);
+
+    this.element = element;
+    this.editTask = this.editTask.bind(this);
+  }
+
+  _createClass(EditTodo, [{
+    key: "editTask",
+    value: function editTask(id) {
+      id = parseInt(id);
+      var title = document.getElementById("title-edit").value;
+      var description = document.getElementById("description-edit").value;
+      var from = document.getElementById("from-edit").value;
+      var to = document.getElementById("to-edit").value;
+      var newTask = {
+        id: id,
+        title: title,
+        description: description,
+        from: from,
+        to: to,
+        complete: false
+      };
+
+      _task.default.editTask(newTask);
+
+      document.getElementById("title-edit").value = "";
+      document.getElementById("description-edit").value = "";
+      document.getElementById("from-edit").value = "";
+      document.getElementById("to-edit").value = "";
+    }
+  }, {
+    key: "handleDOM",
+    value: function handleDOM() {
+      var addTaskEl = document.querySelector("#btn-edit-task");
+      var that = this;
+      addTaskEl && addTaskEl.addEventListener("click", function (e) {
+        that.editTask(e.target.getAttribute("data-id"));
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      return "\n      <div class=\"modal-dialog\">\n        <div class=\"modal-content p-3\">\n          <header class=\"head-form mb-0 mt-4 text-center\">\n            <h2 id=\"header-title\">Edit Task</h2>\n          </header>\n\n          <!-- Modal body -->\n          <div class=\"modal-body\">\n            <form role=\"form\">\n              <div class=\"form-group row\">\n                <div class=\"input-group\">\n                  <label\n                    for=\"example-datetime-local-input\"\n                    class=\"col-2 col-form-label\"\n                    >Title</label\n                  >\n                  <input\n                    type=\"text\"\n                    name=\"title\"\n                    id=\"title-edit\"\n                    class=\"col-10 form-control input-sm\"\n                    placeholder=\"Title\"\n                  />\n                </div>\n\n                <span class=\"sp-thongbao\" id=\"tbMaNV\"></span>\n              </div>\n\n              <div class=\"form-group row\">\n                <label\n                  for=\"example-datetime-local-input\"\n                  class=\"col-2 col-form-label\"\n                  >Description</label\n                >\n                <input\n                  type=\"text\"\n                  name=\"description\"\n                  id=\"description-edit\"\n                  class=\"col-10 form-control input-sm\"\n                  placeholder=\"Description\"\n                />\n              </div>\n              <div class=\"form-group row\">\n                <label\n                  for=\"example-datetime-local-input\"\n                  class=\"col-2 col-form-label\"\n                  >From</label\n                >\n                <input\n                  class=\"form-control col-10\"\n                  type=\"datetime-local\"\n                  id=\"from-edit\"\n                />\n              </div>\n              <div class=\"form-group row\">\n                <label\n                  for=\"example-datetime-local-input\"\n                  class=\"col-2 col-form-label\"\n                  >Due date</label\n                >\n                <input\n                  class=\"form-control col-10\"\n                  type=\"datetime-local\"\n                  id=\"to-edit\"\n                />\n              </div>\n            </form>\n          </div>\n\n          <!-- Modal footer -->\n          <div class=\"modal-footer\" id=\"modal-footer\">\n          ".concat((0, _Button.default)({
+        text: "Đóng",
+        color: "btn-secondary",
+        id: "btnDong",
+        dataDismiss: "modal"
+      }), "\n          ").concat((0, _Button.default)({
+        text: "Edit",
+        color: "btn-success",
+        id: "btn-edit-task",
+        dataDismiss: "modal"
+      }), "\n          </div>\n        </div>\n      </div>\n    ");
+    }
+  }, {
+    key: "init",
+    value: function init() {
+      this.element.innerHTML = this.render();
+      this.handleDOM();
+    }
+  }]);
+
+  return EditTodo;
+}();
+
+exports.default = EditTodo;
+},{"../../store/task":"src/store/task.js","../../components/Button":"src/components/Button.js"}],"src/store/history.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _createState2 = _interopRequireDefault(require("../core/createState"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var initialState = {
+  url: "/"
+};
+
+var _createState = (0, _createState2.default)(initialState),
+    getState = _createState.getState,
+    setState = _createState.setState,
+    subscribe = _createState.subscribe;
+
+var to = function to(url) {
+  setState(function (prevState) {
+    url;
+  });
+};
+
+var history = {
+  getState: getState,
+  setState: setState,
+  subscribe: subscribe,
+  to: to
+};
+var _default = history;
+exports.default = _default;
+},{"../core/createState":"src/core/createState.js"}],"src/index.js":[function(require,module,exports) {
+"use strict";
 
 var _Todolist = _interopRequireDefault(require("./containers/Todolist"));
 
+var _History = _interopRequireDefault(require("./containers/History"));
+
 var _AddTodo = _interopRequireDefault(require("./containers/Modal/AddTodo"));
+
+var _EditTodo = _interopRequireDefault(require("./containers/Modal/EditTodo"));
+
+var _history = _interopRequireDefault(require("./store/history"));
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -657,31 +944,71 @@ var App = /*#__PURE__*/function () {
 
     this.element = element;
     this.todoListInstance = null;
-    this.addTodoInstance = null; // task.subscribe(this.init.bind(this));
+    this.historyInstance = null;
+    this.addTodoInstance = null;
+    this.editTodoInstance = null;
   }
 
   _createClass(App, [{
     key: "handleDom",
     value: function handleDom() {
-      var todoListElement = document.getElementById("card");
-      var addTodoElement = document.getElementById("myModal"); // this.todoListInstance = new TodoList(todoListElement);
-      // this.addTodoInstance = new AddTodo(addTodoElement);
+      var contentElement = document.getElementById("content");
+      var addTodoElement = document.getElementById("myModal");
+      var editTodoElement = document.getElementById("modalEdit");
+
+      if (!this.historyInstance) {
+        this.historyInstance = new _History.default(contentElement);
+      }
 
       if (!this.todoListInstance) {
-        this.todoListInstance = new _Todolist.default(todoListElement);
+        this.todoListInstance = new _Todolist.default(contentElement);
       }
 
       if (!this.addTodoInstance) {
         this.addTodoInstance = new _AddTodo.default(addTodoElement);
       }
 
-      this.todoListInstance.init();
-      this.addTodoInstance.init();
+      if (!this.editTodoInstance) {
+        this.editTodoInstance = new _EditTodo.default(editTodoElement);
+      }
+
+      var routes = _history.default.getState();
+
+      _history.default.to("/history");
+
+      console.log(_history.default.getState());
+
+      switch (routes.url) {
+        case "/":
+          this.todoListInstance.init();
+          break;
+
+        case "/history":
+          this.historyInstance.init();
+          break;
+
+        default:
+          this.todoListInstance.init();
+          break;
+      } // this.historyInstance.init();
+      // this.todoListInstance.init();
+      // this.addTodoInstance.init();
+      // this.editTodoInstance.init();
+
+    }
+  }, {
+    key: "routes",
+    value: function routes() {
+      var routes = _history.default.getstate();
+
+      switch (routes) {
+        case "home":
+      }
     }
   }, {
     key: "render",
     value: function render() {
-      return "\n    <main class=\"content\">\n      <div class=\"todo center\">\n        <div class=\"container\">\n          <div class=\"card text-center\" id=\"card\">\n        \n          </div>\n      </div>\n    </div>\n    <div class=\"modal fade todo__modal\" id=\"myModal\"></div>\n    ";
+      return "\n    <main class=\"content\" id=\"content\">\n     \n    </div>\n    <div class=\"modal fade todo__modal\" id=\"myModal\"></div>\n    <div class=\"modal fade todo__modal\" id=\"modalEdit\"></div>\n    ";
     }
   }, {
     key: "init",
@@ -697,7 +1024,7 @@ var App = /*#__PURE__*/function () {
 var appElement = document.getElementById("root");
 var appInstance = new App(appElement);
 appInstance.init();
-},{"./store/task":"src/store/task.js","./containers/Todolist":"src/containers/Todolist/index.js","./containers/Modal/AddTodo":"src/containers/Modal/AddTodo.js"}],"C:/Users/tung1/AppData/Local/Yarn/Data/global/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./containers/Todolist":"src/containers/Todolist/index.js","./containers/History":"src/containers/History/index.js","./containers/Modal/AddTodo":"src/containers/Modal/AddTodo.js","./containers/Modal/EditTodo":"src/containers/Modal/EditTodo.js","./store/history":"src/store/history.js"}],"C:/Users/tung1/AppData/Local/Yarn/Data/global/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -725,7 +1052,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "4141" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "8968" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

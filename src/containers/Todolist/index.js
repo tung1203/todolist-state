@@ -29,14 +29,33 @@ export default class Counter {
     this.todoListHeaderInstance.init();
     this.todoListTaskListInstance.init();
     this.todoLisFooterInstance.init();
+
+    $("#modalEdit").on("show.bs.modal", function (e) {
+      var taskId = $(e.relatedTarget).data("id");
+      $("#btn-edit-task").attr("data-id", taskId);
+      const currentTask = task.getTaskById(taskId);
+      const { title, description, from, to } = currentTask[0];
+      document.getElementById("title-edit").value = title;
+      document.getElementById("description-edit").value = description;
+      document.getElementById("from-edit").value = from;
+      document.getElementById("to-edit").value = to;
+    });
   }
   render() {
     return `
-    <div class="card-header myCardHeader" id="card-header"></div>
+    <div class="todo center">
+        <div class="container">
+          <div class="card text-center" id="card">
+        
+          <div class="card-header myCardHeader" id="card-header"></div>
 
-    <div class="card-body" id="card-body"></div>
+          <div class="card-body" id="card-body"></div>
 
-    <div class="card-footer myCardFooter" id="card-footer"></div>
+          <div class="card-footer myCardFooter" id="card-footer"></div>
+
+          </div>
+      </div>
+    
 
       `;
   }

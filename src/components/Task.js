@@ -1,9 +1,17 @@
 import StatusIcon from "./StatusIcon";
 import DeleteIcon from "./DeleteIcon";
+import Button from "./Button";
+import dueDate from "../utils/dueDate";
 
 export default function Task({ id, title, description, from, to, complete }) {
+  let color = "";
+  if (complete) {
+    color = "complete";
+  } else {
+    color = dueDate(to);
+  }
   return `
-    <div class="task ${complete ? "complete" : ""}" data-id="${id}">
+    <div class="task ${color}" data-id="${id}">
     ${StatusIcon({ id, complete })}
       <div class="task__content">
           <label class="task__title" id="js-task-title">${title}</label>
@@ -13,13 +21,15 @@ export default function Task({ id, title, description, from, to, complete }) {
           <p class="task__from" id="js-task-from">${from}</p>
           <p class="task__to" id="js-task-to">${to}</p>
       </div>
+      ${Button({
+        text: "Edit",
+        color: "text-info",
+        id: "modalEditBtn",
+        dataToggle: "modal",
+        dataTarget: "#modalEdit",
+        dataId: id,
+      })}
       ${DeleteIcon({ id })}
     </div>
     `;
-}
-
-{
-  /* <input class="status ${
-  complete ? "complete" : ""
-} todoStatus-js" type="checkbox" data-id="${id}" /> */
 }

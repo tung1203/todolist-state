@@ -5,6 +5,7 @@ export default function Button({
   dataToggle,
   dataTarget,
   dataDismiss,
+  dataId,
 }) {
   return `
     <button
@@ -13,6 +14,7 @@ export default function Button({
         data-toggle=${dataToggle}
         data-target=${dataTarget}
         data-dismiss=${dataDismiss}
+        data-id="${dataId}"
         >
         ${text}
     </button>
