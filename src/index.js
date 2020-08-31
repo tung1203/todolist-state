@@ -29,31 +29,20 @@ class App {
       this.editTodoInstance = new EditTodo(editTodoElement);
     }
 
-    const routes = history.getState();
-    history.to("/history");
-    console.log(history.getState());
-    switch (routes.url) {
+    switch (history.getState().url) {
       case "/":
         this.todoListInstance.init();
+        this.addTodoInstance.init();
+        this.editTodoInstance.init();
         break;
       case "/history":
         this.historyInstance.init();
         break;
       default:
         this.todoListInstance.init();
+        this.addTodoInstance.init();
+        this.editTodoInstance.init();
         break;
-    }
-
-    // this.historyInstance.init();
-    // this.todoListInstance.init();
-    // this.addTodoInstance.init();
-    // this.editTodoInstance.init();
-  }
-
-  routes() {
-    const routes = history.getstate();
-    switch (routes) {
-      case "home":
     }
   }
 
@@ -61,7 +50,7 @@ class App {
     return `
     <main class="content" id="content">
      
-    </div>
+    </main>
     <div class="modal fade todo__modal" id="myModal"></div>
     <div class="modal fade todo__modal" id="modalEdit"></div>
     `;

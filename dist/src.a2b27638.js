@@ -904,8 +904,8 @@ var _createState = (0, _createState2.default)(initialState),
     subscribe = _createState.subscribe;
 
 var to = function to(url) {
-  setState(function (prevState) {
-    url;
+  setState({
+    url: url
   });
 };
 
@@ -972,15 +972,11 @@ var App = /*#__PURE__*/function () {
         this.editTodoInstance = new _EditTodo.default(editTodoElement);
       }
 
-      var routes = _history.default.getState();
-
-      _history.default.to("/history");
-
-      console.log(_history.default.getState());
-
-      switch (routes.url) {
+      switch (_history.default.getState().url) {
         case "/":
           this.todoListInstance.init();
+          this.addTodoInstance.init();
+          this.editTodoInstance.init();
           break;
 
         case "/history":
@@ -989,26 +985,15 @@ var App = /*#__PURE__*/function () {
 
         default:
           this.todoListInstance.init();
+          this.addTodoInstance.init();
+          this.editTodoInstance.init();
           break;
-      } // this.historyInstance.init();
-      // this.todoListInstance.init();
-      // this.addTodoInstance.init();
-      // this.editTodoInstance.init();
-
-    }
-  }, {
-    key: "routes",
-    value: function routes() {
-      var routes = _history.default.getstate();
-
-      switch (routes) {
-        case "home":
       }
     }
   }, {
     key: "render",
     value: function render() {
-      return "\n    <main class=\"content\" id=\"content\">\n     \n    </div>\n    <div class=\"modal fade todo__modal\" id=\"myModal\"></div>\n    <div class=\"modal fade todo__modal\" id=\"modalEdit\"></div>\n    ";
+      return "\n    <main class=\"content\" id=\"content\">\n     \n    </main>\n    <div class=\"modal fade todo__modal\" id=\"myModal\"></div>\n    <div class=\"modal fade todo__modal\" id=\"modalEdit\"></div>\n    ";
     }
   }, {
     key: "init",
@@ -1052,7 +1037,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "8968" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "14799" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

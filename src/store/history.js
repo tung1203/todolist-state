@@ -2,9 +2,7 @@ import createState from "../core/createState";
 const initialState = { url: "/" };
 const { getState, setState, subscribe } = createState(initialState);
 const to = (url) => {
-  setState((prevState) => {
-    url;
-  });
+  setState({ url });
 };
 const history = {
   getState,
